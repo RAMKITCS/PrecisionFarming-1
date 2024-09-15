@@ -1,0 +1,157 @@
+### **Precision Farming Hackathon Project**
+
+## **Purpose**
+The goal of this project is to build a precision farming engine that helps farmers automate their operations in an optimal, data-driven way. This engine enables real-time decision-making for key agricultural tasks, helping farmers boost productivity, reduce manual effort, and make informed, timely decisions.
+
+### **Vision**
+Our long-term vision is to create an intelligent, end-to-end farming solution that:
+- **Recommends the best time to plant crops** by taking into account climate requirements and forecasting the optimal time to sell the harvest.
+- **Automates the aggregation of data** from various sources:
+  - Soil information from gauges on farmland.
+  - Weather data from weather APIs.
+  - Insect and disease images captured by drones.
+- **Provides real-time decision-making** for centralized farm equipment, ensuring that all farming operations run smoothly.
+
+### **Current State of the Project**
+The current version of our precision farming engine is built using Retrieval-Augmented Generation (RAG) and provides an AI-powered core system that:
+- Takes user inputs such as location, crop type, soil moisture, and insect and leaf images.
+- Analyzes the data to generate an action plan tailored to the specific crop.
+- Delivers the action plan and its rationale back to the farmer in a narrative format.
+
+Due to limitations, the engine currently does not have access to physical soil meters or farm equipment but provides highly actionable insights and decision-making based on available data.
+
+---
+
+## **Core Engine Overview**
+
+Our precision farming engine is powered by cutting-edge technologies such as **LangChain**, **LangGraph**, and **OpenAI**, all working together to provide real-time analysis and recommendations. 
+
+### **Key Features**
+- **User Inputs**: 
+  - Collects information about location, crop, soil moisture, insect images, and leaf images.
+- **Weather Forecast**: 
+  - Retrieves a 7-day weather forecast to provide irrigation plans.
+- **Insect and Disease Detection**:
+  - Classifies insects and diseases based on images, suggesting actions based on crop guides stored in vector databases.
+- **Soil Condition Analysis**:
+  - Provides suggestions based on optimal pH and moisture levels from crop guides.
+- **Web Search Integration**:
+  - When needed information is not available in vector stores, performs a web search to find relevant data.
+- **Action Plan Generation**:
+  - Combines all relevant information into a well-structured, actionable plan for the farmer.
+
+### **Technology Stack**
+The Precision Farming application is built on a powerful and flexible tech stack to deliver high-performance insights to farmers:
+- **Streamlit**: The core user interface of the application is built using Streamlit, allowing farmers to interact with the system in real-time and receive actionable recommendations.
+- **Python**: The entire backend logic, including data processing, model execution, and API integrations, is developed using Python.
+- **LangChain**: Used to create structured workflows for handling natural language processing tasks and decision-making.
+- **ChromaDB**: Utilized as a vector database to store and retrieve critical crop guide information, such as planting guides for crops like **soybeans** and **corn**.
+- **LangGraph**: Provides the backbone for building and managing the decision-making graph for retrieval tasks and workflows.
+- **Knowledge Base**: The application uses crop production guides for soybeans and corn as a key part of the knowledge base to provide relevant recommendations for planting, pest management, and crop maintenance.
+
+---
+
+## **Usage Instructions**
+
+### **Step 1: Dockerize the Application**
+
+To containerize the Precision Farming engine, follow these steps to build a Docker image and push it to Azure Container Registry (ACR). 
+
+#### Dockerfile
+```Dockerfile
+# Use an official Python runtime as a parent image
+FROM python:3.9-slim
+
+# Set environment variables
+ENV PYTHONUNBUFFERED=1
+
+# Set the working directory in the container
+WORKDIR /app
+
+# Copy the current directory contents into the container at /app
+COPY . /app
+
+# Install any dependencies specified in requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Run the vector store creation script before the Streamlit app
+RUN python CropvectorStore.py
+
+# Expose the port that Streamlit runs on
+EXPOSE 8501
+
+# Command to run the Streamlit application
+CMD ["streamlit", "run", "StreamLitApp.py"]
+```
+
+### **Step 2: Build and Run the Docker Image**
+
+Use the following commands to create a Docker image and run the application locally:
+
+```bash
+# Build the Docker image
+sudo docker build -t precision-farming-app .
+
+# View Docker images
+sudo docker images
+
+# Run the application
+sudo docker run -p 8501:8501 precision-farming-app
+```
+
+### **Step 3: Push the Docker Image to Azure Container Registry (ACR)**
+
+Once the image is built, push it to Azure Container Registry for deployment:
+
+```bash
+# Tag the Docker image
+sudo docker tag precision-farming-app:latest raghackathon.azurecr.io/precision-farming-app:latest
+
+# Log in to ACR
+sudo az acr login --name raghackathon
+
+# Push the image to ACR
+sudo docker push raghackathon.azurecr.io/precision-farming-app:latest
+```
+
+### **Step 4: Deploy to Azure Web App**
+
+After pushing the image to ACR, you can deploy it to an Azure Web App using the Azure Portal or Azure CLI. Azure Web App provides a scalable and reliable platform for hosting the application and making it accessible to end-users.
+
+1. **Go to Azure Portal** and create an Azure Web App.
+2. **Configure the Web App to use Docker**:
+   - Choose **Docker container** and select **Azure Container Registry** as the source.
+   - Enter the details of the image (`raghackathon.azurecr.io/precision-farming-app:latest`).
+3. **Deploy the Web App** and monitor its health and performance using the Azure Portal.
+
+---
+
+## **Advantages of the Implementation**
+
+1. **Scalability**: Using Docker containers and Azure Web App ensures that the application can scale to meet increasing demand, with the ability to handle multiple users and large datasets.
+  
+2. **Portability**: The Dockerized application can be easily run on any platform, ensuring consistent performance across environments—whether it's local development, cloud, or on-premise infrastructure.
+  
+3. **Automation**: By using containerized applications and deploying them to Azure, the entire process can be automated using Azure DevOps pipelines, minimizing manual intervention.
+  
+4. **Real-time Decision Making**: Farmers receive real-time recommendations based on current soil, weather, and crop conditions, helping them optimize their farming practices.
+  
+5. **Reduced Manual Work**: Automating the aggregation of data from various sources such as weather APIs and vector stores reduces the need for manual data entry and processing.
+  
+6. **Cost-effective**: Running the app on Azure Web App services eliminates the need for extensive on-premise infrastructure, reducing maintenance costs and overhead.
+
+---
+
+## **Next Steps**
+- **Integrate real-time data from farm sensors** (soil meters, drones) to automate data aggregation.
+- **Expand equipment control** by integrating farm equipment (e.g., irrigation systems) into the decision-making process.
+- **Scale the model** to support more crops and provide more detailed recommendations.
+
+---
+
+## **Conclusion**
+
+This precision farming engine leverages modern AI and cloud technologies to empower farmers with real-time, data-driven insights. By automating complex farming operations, this project helps farmers increase productivity, optimize resource use, and reduce manual effort, ultimately contributing to more sustainable agricultural practices.
+
+This solution, built on containerization and deployed to Azure, provides scalability, portability, and cost-efficiency, ensuring that it can be used by farmers worldwide to make smarter, more informed decisions.
+
